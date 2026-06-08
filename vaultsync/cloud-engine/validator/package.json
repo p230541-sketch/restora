@@ -1,0 +1,28 @@
+{
+  "name": "vaultsync-validator",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/poller.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/poller.js",
+    "dev": "ts-node src/poller.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.540.0",
+    "@aws-sdk/client-sqs": "^3.540.0",
+    "@aws-sdk/client-secrets-manager": "^3.540.0",
+    "@aws-sdk/client-ses": "^3.540.0",
+    "pg": "^8.11.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.12.7",
+    "@types/pg": "^8.11.5",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.5",
+    "ts-node": "^10.9.2"
+  }
+}

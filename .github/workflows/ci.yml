@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  api:
+    name: API (typecheck + test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vaultsync/cloud-engine/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test
+
+  validator:
+    name: Validator (typecheck + test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vaultsync/cloud-engine/validator
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test
+
+  control-panel:
+    name: Control panel (test + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vaultsync/control-panel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  edge-node:
+    name: Edge node (vet + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: vaultsync/edge-node
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - run: go vet ./...
+      - run: go build ./...
+
+  docker:
+    name: Docker images build
+    runs-on: ubuntu-latest
+    needs: [api, validator, control-panel, edge-node]
+    defaults:
+      run:
+        working-directory: vaultsync
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose build

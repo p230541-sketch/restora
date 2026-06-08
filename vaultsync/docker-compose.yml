@@ -1,0 +1,149 @@
+# Secrets are externalized via env interpolation. Dev defaults keep the local
+# stack working out of the box; production supplies real values via a .env file
+# or the deploy environment (see .env.production.example).
+x-aws-env: &aws-env
+  AWS_ENDPOINT_URL: ${AWS_ENDPOINT_URL-http://localstack:4566}
+  AWS_REGION: ${AWS_REGION:-us-east-1}
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}
+
+x-pg-common: &pg-common
+  image: postgres:16-alpine
+  restart: unless-stopped
+
+services:
+  # ── LocalStack (S3 + SQS + Secrets Manager) ──────────────────────────────
+  localstack:
+    image: localstack/localstack:3
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: s3,sqs,secretsmanager,ses
+      DEFAULT_REGION: us-east-1
+      DOCKER_HOST: unix:///var/run/docker.sock
+    volumes:
+      - localstack-data:/var/lib/localstack
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # ── Source DB (the database being backed up) ──────────────────────────────
+  source-db:
+    <<: *pg-common
+    environment:
+      POSTGRES_USER: vaultsync
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      POSTGRES_DB: appdb
+    volumes:
+      - source-db-data:/var/lib/postgresql/data
+      - ./infra/db/source_seed.sql:/docker-entrypoint-initdb.d/seed.sql
+
+  # ── Ephemeral DB (validation target — scratch Postgres) ───────────────────
+  ephemeral-db:
+    <<: *pg-common
+    environment:
+      POSTGRES_USER: vaultsync
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      POSTGRES_DB: postgres
+    volumes:
+      - ephemeral-db-data:/var/lib/postgresql/data
+
+  # ── Telemetry DB (stores backup pass/fail records) ────────────────────────
+  telemetry-db:
+    <<: *pg-common
+    environment:
+      POSTGRES_USER: vaultsync
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      POSTGRES_DB: telemetry
+    volumes:
+      - telemetry-db-data:/var/lib/postgresql/data
+      - ./infra/db/telemetry_schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  # ── Bootstrap (one-shot: provision LocalStack resources) ──────────────────
+  bootstrap:
+    image: localstack/localstack:3
+    depends_on:
+      localstack:
+        condition: service_healthy
+    environment:
+      <<: *aws-env
+    volumes:
+      - ./infra/localstack/bootstrap.sh:/bootstrap.sh
+    entrypoint: ["/bin/bash", "/bootstrap.sh"]
+    restart: "no"
+
+  # ── Edge daemon (Go) ──────────────────────────────────────────────────────
+  edge-node:
+    build: ./edge-node
+    depends_on:
+      - source-db
+      - localstack
+      - bootstrap
+    environment:
+      <<: *aws-env
+      S3_BUCKET: vaultsync-backups
+      SECRET_ID: vaultsync/aes-key
+      CRON_SCHEDULE: "*/2 * * * *"
+      NODE_ID: us-east-prod-01
+      NODE_IP: "10.0.42.158"
+      SOURCE_DB_DSN: postgres://vaultsync:${POSTGRES_PASSWORD:-secret}@source-db:5432/appdb?sslmode=${PG_SSLMODE:-disable}
+      SPOOL_DIR: /var/spool/vaultsyncd
+      TRIGGER_HTTP_PORT: "9100"
+      TELEMETRY_DB_DSN: postgres://vaultsync:${POSTGRES_PASSWORD:-secret}@telemetry-db:5432/telemetry?sslmode=${PG_SSLMODE:-disable}
+      API_URL: http://api:3001
+    volumes:
+      - edge-spool:/var/spool/vaultsyncd
+    ports:
+      - "9100:9100"
+
+  # ── Validation engine (Node/TS SQS worker) ────────────────────────────────
+  validator:
+    build: ./cloud-engine/validator
+    depends_on:
+      - localstack
+      - bootstrap
+      - ephemeral-db
+      - telemetry-db
+    environment:
+      <<: *aws-env
+      S3_BUCKET: vaultsync-backups
+      SQS_QUEUE_URL: http://localstack:4566/000000000000/vaultsync-validation
+      SECRET_ID: vaultsync/aes-key
+      ALERT_FROM_EMAIL: alerts@vaultsync.io
+      EPHEMERAL_DB_ADMIN_DSN: postgres://vaultsync:${POSTGRES_PASSWORD:-secret}@ephemeral-db:5432/postgres?sslmode=${PG_SSLMODE:-disable}
+      TELEMETRY_DB_DSN: postgres://vaultsync:${POSTGRES_PASSWORD:-secret}@telemetry-db:5432/telemetry?sslmode=${PG_SSLMODE:-disable}
+
+  # ── Telemetry API (Node/Express) ──────────────────────────────────────────
+  api:
+    build: ./cloud-engine/api
+    depends_on:
+      - telemetry-db
+    environment:
+      <<: *aws-env
+      TELEMETRY_DB_DSN: postgres://vaultsync:${POSTGRES_PASSWORD:-secret}@telemetry-db:5432/telemetry?sslmode=${PG_SSLMODE:-disable}
+      EDGE_NODE_URL: http://edge-node:9100
+      API_PORT: "3001"
+      SECRET_ID: vaultsync/aes-key
+      S3_BUCKET: vaultsync-backups
+      ALERT_FROM_EMAIL: alerts@vaultsync.io
+      JWT_SECRET: ${JWT_SECRET:-vaultsync-dev-secret-change-me}
+      NODE_ENV: ${NODE_ENV:-development}
+    ports:
+      - "3001:3001"
+
+  # ── Control Panel (React/Vite) ────────────────────────────────────────────
+  control-panel:
+    build: ./control-panel
+    depends_on:
+      - api
+    ports:
+      - "5173:80"
+
+volumes:
+  localstack-data:
+  source-db-data:
+  ephemeral-db-data:
+  telemetry-db-data:
+  edge-spool:
