@@ -86,7 +86,9 @@ dashboard with auth, alerts, and an audit trail.
       of the recovery key, with explicit offline-storage and rotation guidance.
     </td>
     <td width="50%" valign="top">
-      &nbsp;
+      <img src="docs/img/audit-log.png" alt="Audit log — timestamped record of every privileged action with actor, action, target, and detail"><br>
+      <strong>Audit log.</strong> A timestamped trail of every privileged action —
+      actor, action, target, and detail — for compliance and forensics.
     </td>
   </tr>
 </table>
