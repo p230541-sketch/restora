@@ -6,12 +6,6 @@ import { useAuth } from "../auth/AuthContext";
 import { useToast } from "../components/Toast";
 import { Spinner } from "../components/Spinner";
 
-const DEMO = [
-  { role: "SysAdmin", email: "admin@restora.io", password: "admin123" },
-  { role: "BusinessOwner", email: "owner@restora.io", password: "owner123" },
-  { role: "ReadOnly", email: "viewer@restora.io", password: "viewer123" },
-];
-
 const inputStyle: React.CSSProperties = {
   background: "#010409", border: `1px solid ${colors.border}`, borderRadius: 6,
   padding: "10px 12px", color: colors.textPrimary, fontSize: 14, width: "100%", outline: "none",
@@ -75,22 +69,6 @@ export function Login() {
             {busy ? "Signing in…" : "Sign In"}
           </button>
         </form>
-
-        {/* Demo credentials */}
-        <div style={{ marginTop: 16, background: colors.bgCard, border: `1px solid ${colors.border}`, borderRadius: 8, padding: 14 }}>
-          <div style={{ fontSize: 11, color: colors.textSecondary, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Demo accounts — click to fill</div>
-          {DEMO.map((d) => (
-            <button
-              key={d.email}
-              type="button"
-              onClick={() => { setEmail(d.email); setPassword(d.password); }}
-              style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer", padding: "6px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}
-            >
-              <span style={{ fontSize: 13, color: colors.textPrimary }}>{d.role}</span>
-              <span style={{ fontSize: 12, color: colors.textMuted, fontFamily: "monospace" }}>{d.email} / {d.password}</span>
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   );
