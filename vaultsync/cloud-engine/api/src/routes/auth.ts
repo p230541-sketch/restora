@@ -9,9 +9,9 @@ import { AUTH_COOKIE, CSRF_COOKIE, authCookieOptions, csrfCookieOptions } from "
 const router = Router();
 
 const DEFAULT_USERS: { email: string; name: string; password: string; role: Role }[] = [
-  { email: "admin@restora.io", name: "Sarah Chen", password: "admin123", role: "SysAdmin" },
-  { email: "owner@restora.io", name: "Marcus Reid", password: "owner123", role: "BusinessOwner" },
-  { email: "viewer@restora.io", name: "Ava Patel", password: "viewer123", role: "ReadOnly" },
+  { email: "admin@restora.io", name: "Sarah Chen", password: "RestoraAdmin!2026", role: "SysAdmin" },
+  { email: "owner@restora.io", name: "Marcus Reid", password: "RestoraOwner!2026", role: "BusinessOwner" },
+  { email: "viewer@restora.io", name: "Ava Patel", password: "RestoraViewer!2026", role: "ReadOnly" },
 ];
 
 /** Seed default demo accounts the first time the users table is empty. */

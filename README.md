@@ -137,9 +137,9 @@ Open **http://localhost:5173** and sign in:
 
 | Role | Login |
 |------|-------|
-| SysAdmin | `admin@restora.io` / `admin123` |
-| BusinessOwner | `owner@restora.io` / `owner123` |
-| ReadOnly | `viewer@restora.io` / `viewer123` |
+| SysAdmin | `admin@restora.io` / `RestoraAdmin!2026` |
+| BusinessOwner | `owner@restora.io` / `RestoraOwner!2026` |
+| ReadOnly | `viewer@restora.io` / `RestoraViewer!2026` |
 
 The stack provisions itself (bucket / queue / secret / SES) and starts taking backups every 2 minutes.
 Watch them reach **PASS** in the dashboard.
