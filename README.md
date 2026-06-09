@@ -100,9 +100,9 @@ Open **http://localhost:5173** and sign in:
 
 | Role | Login |
 |------|-------|
-| SysAdmin | `admin@vaultsync.io` / `admin123` |
-| BusinessOwner | `owner@vaultsync.io` / `owner123` |
-| ReadOnly | `viewer@vaultsync.io` / `viewer123` |
+| SysAdmin | `admin@restora.io` / `admin123` |
+| BusinessOwner | `owner@restora.io` / `owner123` |
+| ReadOnly | `viewer@restora.io` / `viewer123` |
 
 The stack provisions itself (bucket / queue / secret / SES) and starts taking backups every 2 minutes.
 Watch them reach **PASS** in the dashboard.

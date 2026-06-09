@@ -7,9 +7,9 @@ import { useToast } from "../components/Toast";
 import { Spinner } from "../components/Spinner";
 
 const DEMO = [
-  { role: "SysAdmin", email: "admin@vaultsync.io", password: "admin123" },
-  { role: "BusinessOwner", email: "owner@vaultsync.io", password: "owner123" },
-  { role: "ReadOnly", email: "viewer@vaultsync.io", password: "viewer123" },
+  { role: "SysAdmin", email: "admin@restora.io", password: "admin123" },
+  { role: "BusinessOwner", email: "owner@restora.io", password: "owner123" },
+  { role: "ReadOnly", email: "viewer@restora.io", password: "viewer123" },
 ];
 
 const inputStyle: React.CSSProperties = {
@@ -60,7 +60,7 @@ export function Login() {
           <div style={{ fontSize: 16, fontWeight: 700, color: colors.textPrimary, marginBottom: 18 }}>Sign in</div>
 
           <label style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 6, display: "block" }}>Email</label>
-          <input type="email" autoFocus value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@vaultsync.io" style={{ ...inputStyle, marginBottom: 14 }} />
+          <input type="email" autoFocus value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@restora.io" style={{ ...inputStyle, marginBottom: 14 }} />
 
           <label style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 6, display: "block" }}>Password</label>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" style={{ ...inputStyle, marginBottom: 22 }} />

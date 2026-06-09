@@ -70,7 +70,7 @@ and delete/replace the demo accounts** (Users page, SysAdmin):
 
 | Role | Login |
 |------|-------|
-| SysAdmin | `admin@vaultsync.io` / `admin123` |
+| SysAdmin | `admin@restora.io` / `admin123` |
 
 ### 7. Verify
 ```bash

@@ -67,7 +67,7 @@ export function UserModal({ user, onClose, onSaved }: Props) {
 
         <div style={{ marginBottom: 14 }}>
           <label style={label}>Email {!editing && <span style={{ color: colors.red }}>*</span>}</label>
-          <input type="email" value={email} disabled={editing} onChange={(e) => setEmail(e.target.value)} placeholder="user@vaultsync.io"
+          <input type="email" value={email} disabled={editing} onChange={(e) => setEmail(e.target.value)} placeholder="user@restora.io"
             style={{ ...inputStyle, opacity: editing ? 0.6 : 1, cursor: editing ? "not-allowed" : "text" }} />
         </div>
 
