@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
-import { Shield, ShieldCheck, Lock, Activity, LogIn } from "lucide-react";
+import { Shield, ShieldCheck, Lock, Activity, LogIn, KeyRound } from "lucide-react";
 import { colors } from "../styles/theme";
 import { useAuth } from "../auth/AuthContext";
 import { useToast } from "../components/Toast";
@@ -25,6 +25,7 @@ export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
 
   const from = (location.state as any)?.from?.pathname ?? "/";
   if (user) return <Navigate to={from} replace />;
@@ -99,7 +100,12 @@ export function Login() {
             <label style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 6, display: "block" }}>Email</label>
             <input type="email" autoFocus value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@restora.io" style={{ ...inputStyle, marginBottom: 16 }} />
 
-            <label style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 6, display: "block" }}>Password</label>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <label style={{ fontSize: 12, color: colors.textSecondary }}>Password</label>
+              <button type="button" onClick={() => setShowForgot(true)} style={{ background: "none", border: "none", color: colors.blue, fontSize: 12, cursor: "pointer", padding: 0 }}>
+                Forgot password?
+              </button>
+            </div>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" style={{ ...inputStyle, marginBottom: 24 }} />
 
             <button type="submit" disabled={busy || !email || !password} style={{
@@ -118,6 +124,28 @@ export function Login() {
           </div>
         </div>
       </div>
+
+      {/* ── Forgot-password modal ──────────────────────────────────── */}
+      {showForgot && (
+        <div onClick={() => setShowForgot(false)} style={{ position: "fixed", inset: 0, background: "rgba(1,4,9,0.72)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 24 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: 400, maxWidth: "100%", background: colors.bgCard, border: `1px solid ${colors.border}`, borderRadius: 12, padding: 26 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 9, background: colors.blueDim, display: "flex", alignItems: "center", justifyContent: "center", color: colors.blue }}>
+                <KeyRound size={18} />
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: colors.textPrimary }}>Reset your password</div>
+            </div>
+            <p style={{ fontSize: 13.5, color: colors.textSecondary, lineHeight: 1.6, marginBottom: 22 }}>
+              Restora accounts are provisioned by your organization. For security,
+              password resets are handled by a system administrator — contact your
+              SysAdmin, who can reset it for you from the Users console.
+            </p>
+            <button onClick={() => setShowForgot(false)} style={{ width: "100%", background: colors.blue, border: "none", borderRadius: 8, padding: "11px", color: "#fff", fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
